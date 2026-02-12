@@ -129,8 +129,19 @@ export function StoryManagement() {
     // Upload the file
     const url = await uploadImage(file);
     if (url) {
-      setFormData(prev => ({ ...prev, image_url: url }));
-      console.log('Image URL set in form:', url);
+      console.log('=== IMAGE URL RECEIVED FROM UPLOAD ===');
+      console.log('Full URL:', url);
+      console.log('URL length:', url.length);
+      console.log('URL type:', typeof url);
+      console.log('First 50 chars:', url.substring(0, 50));
+      console.log('=====================================');
+      
+      setFormData(prev => {
+        const newData = { ...prev, image_url: url };
+        console.log('Setting formData.image_url to:', url);
+        console.log('New formData:', newData);
+        return newData;
+      });
     } else {
       // Clear preview if upload failed
       setPreviewImage(null);
@@ -156,12 +167,18 @@ export function StoryManagement() {
       return;
     }
     
-    console.log('Adding story with data:', formData);
+    const imageUrl = formData.image_url.trim();
+    console.log('Adding story with data:', {
+      title: formData.title.trim(),
+      content: formData.content.trim(),
+      image_url: imageUrl,
+      image_url_length: imageUrl.length
+    });
     
     const success = await addStory({
       title: formData.title.trim(),
       content: formData.content.trim(),
-      image_url: formData.image_url.trim() || undefined
+      image_url: imageUrl || undefined
     });
     
     if (success) {
@@ -180,12 +197,19 @@ export function StoryManagement() {
       return;
     }
     
-    console.log('Updating story with data:', formData);
+    const imageUrl = formData.image_url.trim();
+    console.log('Updating story with data:', {
+      id: editingStory.id,
+      title: formData.title.trim(),
+      content: formData.content.trim(),
+      image_url: imageUrl,
+      image_url_length: imageUrl.length
+    });
     
     const success = await updateStory(editingStory.id, {
       title: formData.title.trim(),
       content: formData.content.trim(),
-      image_url: formData.image_url.trim() || null
+      image_url: imageUrl || null
     });
     
     if (success) {
@@ -353,7 +377,7 @@ export function StoryManagement() {
                 className="flex items-start justify-between p-4 border rounded-lg hover:border-primary/50 transition-colors"
               >
                 <div className="flex gap-3 flex-1 min-w-0 mr-4">
-                  {story.image_url && (
+                  {story.image_url && story.image_url.startsWith('http') && (
                     <img
                       src={story.image_url}
                       alt={story.title}
